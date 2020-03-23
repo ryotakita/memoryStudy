@@ -4,6 +4,7 @@ class Question():
     def __init__(self, subject):
         self.subject = subject
         self.option = [""]
+        self.ans = 0
 
     def addOption(self, option):
         self.option.append(option)
@@ -19,9 +20,14 @@ if os.path.getsize('lstQuestion.pickle') > 0:
 
 while(loop):
     mode = input("1:問題 2:問題追加 3:終了\n")
+    #問題表示
     if(mode == "1"):
-        print("実装中")
-        print(lstQuestion)
+        for ques in lstQuestion:
+            print(ques.subject)
+            for opt in ques.option:
+                print(opt)
+
+    #問題追加モード
     elif(mode == "2"):
         subject = input("問題文を入力してください\n")
         question = Question(subject)
@@ -32,7 +38,12 @@ while(loop):
         for i in range(int(numOption)):
             option = input("選択肢" + str(i+1) + "を入力してください\n")
             question.addOption(option)
+        Ans = input("正解の選択肢を入力してください")
+        question.ans = int(Ans)
         lstQuestion.append(question)
+
+
+    #終了処理
     elif(mode == "3"):
         loop = False
         #DevModeの場合はシリアライズせず終了する
@@ -50,5 +61,7 @@ while(loop):
         print("シリアライズ終了")
         print("これ以降の問題追加は、シリアライズされません")
         isDevMode = True
+
+    #異常
     else:
         print("引数が不正です")
