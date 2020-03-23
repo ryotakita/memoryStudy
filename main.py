@@ -1,13 +1,20 @@
 import pickle
 import os
+import datetime
 class Question():
     def __init__(self, subject):
         self.subject = subject
-        self.option = [""]
+        self.option = ["first"]
         self.ans = 0
+        self.numCorrect = 0
+        self.numWrong = 0
+        self.latestAnsDate = datetime.datetime.now()
 
     def addOption(self, option):
-        self.option.append(option)
+        if self.option[0] == "first":
+            self.option[0] = option
+        else:
+            self.option.append(option)
 
 
 loop = True
@@ -23,9 +30,14 @@ while(loop):
     #問題表示
     if(mode == "1"):
         for ques in lstQuestion:
-            print(ques.subject)
+            print("問題: " + ques.subject)
             for opt in ques.option:
-                print(opt)
+                print("選択肢" + str(ques.option.index(opt)+1) + "番目: " + opt)
+            userAns = input("正解は？")
+            if(int(userAns) == ques.ans):
+                print("正解")
+            else:
+                print("不正解")
 
     #問題追加モード
     elif(mode == "2"):
