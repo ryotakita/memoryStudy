@@ -37,7 +37,7 @@ while(loop):
     #問題表示
     if(mode == "1"):
         for ques in lstQuestion:
-            if ques.getPercentageOfCorrect() > 0.9 and ques.getDelta(datetime.datetime.now()).days < 7 :
+            if ques.getPercentageOfCorrect() > 0.9 or ques.getDelta(datetime.datetime.now()).days < 7 :
                 continue
             print("正答率:" + str(ques.getPercentageOfCorrect() * 100) + "%")
             print("問題: " + ques.subject)
