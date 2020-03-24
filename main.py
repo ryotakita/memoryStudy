@@ -15,6 +15,13 @@ class Question():
             self.option[0] = option
         else:
             self.option.append(option)
+    def getPercentageOfCorrect(self):
+        if self.numCorrect + self.numWrong == 0:
+            return 0
+        return self.numCorrect / (self.numCorrect+self.numWrong)
+    def getDelta(self, now):
+        return now - self.latestAnsDate
+
 
 
 loop = True
@@ -30,14 +37,20 @@ while(loop):
     #問題表示
     if(mode == "1"):
         for ques in lstQuestion:
+            if ques.getPercentageOfCorrect() > 0.9 and ques.getDelta(datetime.datetime.now()).days < 7 :
+                continue
+            print("正答率:" + str(ques.getPercentageOfCorrect() * 100) + "%")
             print("問題: " + ques.subject)
             for opt in ques.option:
                 print("選択肢" + str(ques.option.index(opt)+1) + "番目: " + opt)
             userAns = input("正解は？")
             if(int(userAns) == ques.ans):
                 print("正解")
+                ques.numCorrect += 1
+                ques.latestAnsDate = datetime.datetime.now()
             else:
                 print("不正解")
+                ques.numWrong += 1
 
     #問題追加モード
     elif(mode == "2"):
@@ -65,6 +78,18 @@ while(loop):
                 pickle.dump(lstQuestion, f)
         else:
             print("DevModeなので、シリアライズせずに終了します")
+    
+    elif(mode == "4"):
+        print("問題を全消去します.よろしいですか？")
+        ans = input("yes:1/no:0")
+        if ans == 1:
+            lstQuestion.clear()
+
+    elif(mode == "5"):
+        for ques in lstQuestion:
+            print(ques.getPercentageOfCorrect())
+            print("日付:" + str(ques.getDelta(datetime.datetime.now()).days))
+
     elif(mode == ""):
         print("DevMode")
         print("現在までの問題をシリアライズします")
