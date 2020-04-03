@@ -1,14 +1,19 @@
 import pickle
+import csv
 import os
 import datetime
+import random
 class Question():
-    def __init__(self, subject):
+    def __init__(self, subject, kaisetu , option, ans, numCorrect, numWrong, latestAnsDate, kind):
         self.subject = subject
-        self.option = ["first"]
-        self.ans = 0
-        self.numCorrect = 0
-        self.numWrong = 0
-        self.latestAnsDate = datetime.datetime.now()
+        self.kaisetu = kaisetu
+        self.option = option
+        self.ans = ans
+        self.numCorrect = numCorrect
+        self.numWrong = numWrong
+        self.kind = kind
+        lstDate = latestAnsDate.split(":")
+        self.latestAnsDate = datetime.date(int(lstDate[0]), int(lstDate[1]), int(lstDate[2]))
 
     def addOption(self, option):
         if self.option[0] == "first":
@@ -20,7 +25,26 @@ class Question():
             return 0
         return self.numCorrect / (self.numCorrect+self.numWrong)
     def getDelta(self, now):
-        return now - self.latestAnsDate
+        return (now - self.latestAnsDate).days
+    def getDataForCSV(self):
+        day = self.latestAnsDate.day
+        month = self.latestAnsDate.month
+        year = self.latestAnsDate.year
+        strDate = str(year) + ":" + str(month) + ":" + str(day)
+        return [self.subject, self.kaisetu, self.option[0], self.option[1], self.ans, self.numCorrect, self.numWrong, strDate, self.kind]
+    def getCountOfAns(self):
+        test = int(self.numCorrect) + int(self.numWrong)
+        return int(self.numCorrect) + int(self.numWrong)
+    def evalShouldAns(self):
+        test =  self.getDelta(datetime.date.today())
+        if(self.getDelta(datetime.date.today()) == 0):
+            return 1
+        return (self.getPercentageOfCorrect() * self.getCountOfAns() * 10) / int(self.getDelta(datetime.date.today())) 
+
+def seqQuit():
+    input()
+    os.system("cls")
+
 
 
 
@@ -28,44 +52,62 @@ loop = True
 lstQuestion = []
 isDevMode = False
 
-if os.path.getsize('lstQuestion.pickle') > 0:
-    with open('lstQuestion.pickle', 'rb') as f:
-        lstQuestion = pickle.load(f)
+with open('lstQuestion.csv') as f:
+    reader = csv.reader(f)
+    lstQuestionTmp = [row for row in reader]
+for lst in lstQuestionTmp:
+    if lst:
+        ques = Question(lst[0], lst[1],lst[2:4], lst[4], int(lst[5]), int(lst[6]), lst[7], lst[8])
+        lstQuestion.append(ques)
 
 while(loop):
     mode = input("1:問題 2:問題追加 3:終了\n")
     #問題表示
+    lstQuestion.sort(key = lambda lst: lst.evalShouldAns())
     if(mode == "1"):
+        nCountTodayAns = 0
         for ques in lstQuestion:
-            if ques.getPercentageOfCorrect() > 0.9 or ques.getDelta(datetime.datetime.now()).days < 7 :
-                continue
+            nCountTodayAns += 1
+            nCountTodayPerAll = ((nCountTodayAns - 1) / len(lstQuestion)) * 100
+            print("現在回答率:" + str(nCountTodayPerAll) + "%")
             print("正答率:" + str(ques.getPercentageOfCorrect() * 100) + "%")
             print("問題: " + ques.subject)
             for opt in ques.option:
                 print("選択肢" + str(ques.option.index(opt)+1) + "番目: " + opt)
             userAns = input("正解は？")
-            if(int(userAns) == ques.ans):
+            if(userAns == ques.ans):
                 print("正解")
+                print(ques.kaisetu)
+                seqQuit()
                 ques.numCorrect += 1
-                ques.latestAnsDate = datetime.datetime.now()
+                ques.latestAnsDate = datetime.date.today()
+            elif(userAns == "0"):
+                print("終了します")
+                print("今日の回答数は" + str(nCountTodayAns - 1) + "問でした。")
+                print("回答率は" + str(nCountTodayPerAll) + "%です。")
+                input()
+                break
             else:
                 print("不正解")
+                print(ques.kaisetu)
+                seqQuit()
                 ques.numWrong += 1
 
     #問題追加モード
     elif(mode == "2"):
-        subject = input("問題文を入力してください\n")
-        question = Question(subject)
-        print(question.subject)
-        numOption = input("選択肢の数を入力してください(デフォルト=2)\n")
-        if(numOption == ""):
-            numOption = 2
-        for i in range(int(numOption)):
-            option = input("選択肢" + str(i+1) + "を入力してください\n")
-            question.addOption(option)
-        Ans = input("正解の選択肢を入力してください")
-        question.ans = int(Ans)
-        lstQuestion.append(question)
+        print("廃止予定")
+        #subject = input("問題文を入力してください\n")
+        #question = Question(subject)
+        #print(question.subject)
+        #numOption = input("選択肢の数を入力してください(デフォルト=2)\n")
+        #if(numOption == ""):
+            #numOption = 2
+        #for i in range(int(numOption)):
+            #option = input("選択肢" + str(i+1) + "を入力してください\n")
+            #question.addOption(option)
+        #Ans = input("正解の選択肢を入力してください")
+        #question.ans = int(Ans)
+        #lstQuestion.append(question)
 
 
     #終了処理
@@ -74,8 +116,11 @@ while(loop):
         #DevModeの場合はシリアライズせず終了する
         if not isDevMode:
             print("終了します")
-            with open('lstQuestion.pickle', 'wb') as f:
-                pickle.dump(lstQuestion, f)
+            with open('lstQuestion.csv', 'w') as f:
+                writer = csv.writer(f)
+                for lst in lstQuestion:
+                    writer.writerow(lst.getDataForCSV())
+
         else:
             print("DevModeなので、シリアライズせずに終了します")
     
@@ -87,8 +132,9 @@ while(loop):
 
     elif(mode == "5"):
         for ques in lstQuestion:
+            print(ques.subject)
             print(ques.getPercentageOfCorrect())
-            print("日付:" + str(ques.getDelta(datetime.datetime.now()).days))
+            print("日付:" + str(ques.getDelta(datetime.date.today())))
 
     elif(mode == ""):
         print("DevMode")
