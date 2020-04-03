@@ -3,6 +3,7 @@ import csv
 import os
 import datetime
 import random
+import platform
 class Question():
     def __init__(self, subject, kaisetu , option, ans, numCorrect, numWrong, latestAnsDate, kind):
         self.subject = subject
@@ -43,7 +44,10 @@ class Question():
 
 def seqQuit():
     input()
-    os.system("cls")
+    if(platform.system() == "Windows"):
+        os.system("cls")
+    else:
+        os.system("clear")
 
 
 
