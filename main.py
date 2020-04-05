@@ -66,7 +66,7 @@ for lst in lstQuestionTmp:
         lstQuestion.append(ques)
 
 while(loop):
-    mode = input("1:問題 2:問題追加 3:終了\n")
+    mode = input("1:問題 2:回答統計 3:終了\n")
     #問題表示
     lstQuestion.sort(key = lambda lst: lst.evalShouldAns())
     if(mode == "1"):
@@ -98,22 +98,11 @@ while(loop):
                 seqQuit()
                 ques.numWrong += 1
 
-    #問題追加モード
+    #問題統計モード
     elif(mode == "2"):
-        print("廃止予定")
-        #subject = input("問題文を入力してください\n")
-        #question = Question(subject)
-        #print(question.subject)
-        #numOption = input("選択肢の数を入力してください(デフォルト=2)\n")
-        #if(numOption == ""):
-            #numOption = 2
-        #for i in range(int(numOption)):
-            #option = input("選択肢" + str(i+1) + "を入力してください\n")
-            #question.addOption(option)
-        #Ans = input("正解の選択肢を入力してください")
-        #question.ans = int(Ans)
-        #lstQuestion.append(question)
-
+        length = len(lstQuestion)
+        print("全問題数は" + str(length) + "問です")
+        print("結果表示開発中")
 
     #終了処理
     elif(mode == "3"):
