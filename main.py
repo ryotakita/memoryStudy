@@ -130,15 +130,6 @@ while(loop):
             print(ques.getPercentageOfCorrect())
             print("日付:" + str(ques.getDelta(datetime.date.today())))
 
-    elif(mode == ""):
-        print("DevMode")
-        print("現在までの問題をシリアライズします")
-        with open('lstQuestion.pickle', 'wb') as f:
-            pickle.dump(lstQuestion, f)
-        print("シリアライズ終了")
-        print("これ以降の問題追加は、シリアライズされません")
-        isDevMode = True
-
     #異常
     else:
         print("引数が不正です")
