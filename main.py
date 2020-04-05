@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pickle
 import csv
 import os
@@ -56,7 +57,7 @@ loop = True
 lstQuestion = []
 isDevMode = False
 
-with open('lstQuestion.csv') as f:
+with open('lstQuestion.csv', encoding="shift-jis") as f:
     reader = csv.reader(f)
     lstQuestionTmp = [row for row in reader]
 for lst in lstQuestionTmp:
@@ -120,7 +121,7 @@ while(loop):
         #DevModeの場合はシリアライズせず終了する
         if not isDevMode:
             print("終了します")
-            with open('lstQuestion.csv', 'w') as f:
+            with open('lstQuestion.csv', 'w', encoding="shift-jis") as f:
                 writer = csv.writer(f)
                 for lst in lstQuestion:
                     writer.writerow(lst.getDataForCSV())
