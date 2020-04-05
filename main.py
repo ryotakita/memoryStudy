@@ -68,7 +68,9 @@ for lst in lstQuestionTmp:
 while(loop):
     mode = input("1:問題 2:問題追加 3:終了\n")
     #問題表示
-    lstQuestion.sort(key = lambda lst: lst.evalShouldAns())
+    category = input("問題カテゴリを指定してください。")
+    lstQuesByCategory = filter(lambda x: x.kind == category, lstQuestion)
+    lstQuesByCategory.sort(key = lambda lst: lst.evalShouldAns())
     if(mode == "1"):
         nCountTodayAns = 0
         for ques in lstQuestion:
