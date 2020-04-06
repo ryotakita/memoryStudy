@@ -5,6 +5,10 @@ import os
 import datetime
 import random
 import platform
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 class Question():
     def __init__(self, subject, kaisetu , option, ans, numCorrect, numWrong, latestAnsDate, kind):
         self.subject = subject
@@ -14,8 +18,11 @@ class Question():
         self.numCorrect = numCorrect
         self.numWrong = numWrong
         self.kind = kind
-        lstDate = latestAnsDate.split(":")
-        self.latestAnsDate = datetime.date(int(lstDate[0]), int(lstDate[1]), int(lstDate[2]))
+        if latestAnsDate == "":
+            self.latestAnsDate = datetime.date(1996, 8, 20)
+        else:
+            lstDate = latestAnsDate.split(":")
+            self.latestAnsDate = datetime.date(int(lstDate[0]), int(lstDate[1]), int(lstDate[2]))
 
     def addOption(self, option):
         if self.option[0] == "first":
@@ -34,11 +41,11 @@ class Question():
         year = self.latestAnsDate.year
         strDate = str(year) + ":" + str(month) + ":" + str(day)
         return [self.subject, self.kaisetu, self.option[0], self.option[1], self.ans, self.numCorrect, self.numWrong, strDate, self.kind]
+    def IsAlmostOk(self):
+        return (self.getPercentageOfCorrect() > 0.9 and self.getCountOfAns() > 10)
     def getCountOfAns(self):
-        test = int(self.numCorrect) + int(self.numWrong)
-        return int(self.numCorrect) + int(self.numWrong)
+        return self.numCorrect + self.numWrong
     def evalShouldAns(self):
-        test =  self.getDelta(datetime.date.today())
         if(self.getDelta(datetime.date.today()) == 0):
             return 1
         return (self.getPercentageOfCorrect() * self.getCountOfAns() * 10) / int(self.getDelta(datetime.date.today())) 
@@ -49,6 +56,15 @@ def seqQuit():
         os.system("cls")
     else:
         os.system("clear")
+
+def createGraphData(lstOk, lstNg, lstKind):
+    for kind in lstKind:
+        numOfOk = len(list(filter(lambda x: x.kind == kind and x.IsAlmostOk, lstQuestion)))
+        numOfNg = len(list(filter(lambda x: x.kind == kind and not x.IsAlmostOk, lstQuestion)))
+        lstOk.append(numOfOk)
+        lstNg.append(numOfNg)
+    
+
 
 
 
@@ -102,7 +118,21 @@ while(loop):
     elif(mode == "2"):
         length = len(lstQuestion)
         print("全問題数は" + str(length) + "問です")
-        print("結果表示開発中")
+        lstKind = ['計画', '建築史', '環境', '法規', '構造', '施工']
+        lstOk = []
+        lstNg = []
+        createGraphData(lstOk, lstNg, lstKind)
+        dataset = pd.DataFrame([lstOk, lstNg], 
+                       #TODO:本当はlstKIndと合わせたいが日本語対応してないのでこれでしのぐ
+                       columns=['Plan', 'History' ,'Environment', 'Law', 'Structure', 'Construction'], 
+                       index=['NG', 'OK'])
+        fig, ax = plt.subplots(figsize=(10, 8))
+        for i in range(len(dataset)):
+            ax.bar(dataset.columns, dataset.iloc[i], bottom=dataset.iloc[:i].sum())
+        ax.set(xlabel='Subject', ylabel='AllQuestion')
+        ax.legend(dataset.index)
+        plt.show()
+        
 
     #終了処理
     elif(mode == "3"):
