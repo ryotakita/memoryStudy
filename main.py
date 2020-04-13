@@ -41,8 +41,10 @@ class Question():
         year = self.latestAnsDate.year
         strDate = str(year) + ":" + str(month) + ":" + str(day)
         return [self.subject, self.kaisetu, self.option[0], self.option[1], self.ans, self.numCorrect, self.numWrong, strDate, self.kind]
-    def IsAlmostOk(self):
+    def IsOk(self):
         return (self.getPercentageOfCorrect() > 0.9 and self.getCountOfAns() > 10)
+    def IsAlmostOk(self):
+        return (not self.IsOk()) and (self.getPercentageOfCorrect() > 0.8 and self.getCountOfAns() > 4)
     def getCountOfAns(self):
         return self.numCorrect + self.numWrong
     def evalShouldAns(self):
@@ -57,12 +59,14 @@ def seqQuit():
     else:
         os.system("clear")
 
-def createGraphData(lstOk, lstNg, lstKind):
+def createGraphData(lstOk, lstAlmostOk, lstNg, lstKind):
     for kind in lstKind:
-        numOfOk = len(list(filter(lambda x: x.kind == kind and x.IsAlmostOk, lstQuestion)))
-        numOfNg = len(list(filter(lambda x: x.kind == kind and not x.IsAlmostOk, lstQuestion)))
+        numOfOk = len(list(filter(lambda x: x.kind == kind and x.IsOk(), lstQuestion)))
+        numOfAlmostOk = len(list(filter(lambda x: x.kind == kind and x.IsAlmostOk(), lstQuestion)))
+        numOfNg = len(list(filter(lambda x: x.kind == kind and not x.IsAlmostOk() and not x.IsOk(), lstQuestion)))
         lstOk.append(numOfOk)
         lstNg.append(numOfNg)
+        lstAlmostOk.append(numOfAlmostOk)
     
 
 
@@ -120,12 +124,13 @@ while(loop):
         print("全問題数は" + str(length) + "問です")
         lstKind = ['計画', '建築史', '環境', '法規', '構造', '施工']
         lstOk = []
+        lstAlmostOk = []
         lstNg = []
-        createGraphData(lstOk, lstNg, lstKind)
-        dataset = pd.DataFrame([lstOk, lstNg], 
+        createGraphData(lstOk, lstAlmostOk, lstNg, lstKind)
+        dataset = pd.DataFrame([lstNg, lstAlmostOk, lstOk], 
                        #TODO:本当はlstKIndと合わせたいが日本語対応してないのでこれでしのぐ
                        columns=['Plan', 'History' ,'Environment', 'Law', 'Structure', 'Construction'], 
-                       index=['NG', 'OK'])
+                       index=['NG', 'AlmostOK', 'OK'])
         fig, ax = plt.subplots(figsize=(10, 8))
         for i in range(len(dataset)):
             ax.bar(dataset.columns, dataset.iloc[i], bottom=dataset.iloc[:i].sum())
@@ -140,6 +145,7 @@ while(loop):
         #DevModeの場合はシリアライズせず終了する
         if not isDevMode:
             print("終了します")
+            lstQuestion.sort(key = lambda lst: lst.evalShouldAns()) #最新の順番に整理するためソート
             with open('lstQuestion.csv', 'w', encoding="shift-jis") as f:
                 writer = csv.writer(f)
                 for lst in lstQuestion:
