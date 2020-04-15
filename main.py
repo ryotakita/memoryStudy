@@ -150,6 +150,17 @@ while(loop):
                 writer = csv.writer(f)
                 for lst in lstQuestion:
                     writer.writerow(lst.getDataForCSV())
+            #とりあえず日付ごとの状況を記録しておく
+            with open('history.csv', 'a', encoding="shift-jis") as f:
+                writer = csv.writer(f)
+                day = datetime.date.today().day
+                month = datetime.date.today().month
+                year = datetime.date.today().year
+                strDate = str(year) + ":" + str(month) + ":" + str(day)
+                numOfOk = len(list(filter(lambda x: x.IsOk(), lstQuestion)))
+                numOfAlmostOk = len(list(filter(lambda x: x.IsAlmostOk(), lstQuestion)))
+                numOfNg = len(list(filter(lambda x: not x.IsAlmostOk() and not x.IsOk(), lstQuestion)))
+                writer.writerow([strDate, numOfNg, numOfAlmostOk, numOfOk])
 
         else:
             print("DevModeなので、シリアライズせずに終了します")
