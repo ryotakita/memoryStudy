@@ -8,7 +8,6 @@ import platform
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 class Question():
     def __init__(self, subject, kaisetu , option, ans, numCorrect, numWrong, latestAnsDate, kind):
         self.subject = subject
@@ -113,8 +112,9 @@ while(loop):
                 input()
                 break
             else:
-                print("不正解")
+                print("不正解!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 print(ques.kaisetu)
+                input("")
                 seqQuit()
                 ques.numWrong += 1
 
