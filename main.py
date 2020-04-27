@@ -119,12 +119,6 @@ def showHistory():
     plt.legend(bbox_to_anchor=(0, 1), loc='upper left', borderaxespad=0)
     plt.show()
 
-    
-
-
-
-
-
 loop = True
 lstQuestion = []
 isDevMode = False
@@ -233,8 +227,8 @@ while(loop):
                 strDate = str(year) + "-" + str(month) + "-" + str(day)
                 numOfOk = len(list(filter(lambda x: x.IsOk(), lstQuestion)))
                 numOfAlmostOk = len(list(filter(lambda x: x.IsAlmostOk(), lstQuestion)))
-                numOfNg = len(list(filter(lambda x: not x.IsAlmostOk() and not x.IsOk(), lstQuestion)))
-                writer.writerow([strDate, numOfNg, numOfAlmostOk, numOfOk])
+                numOfQues = len(lstQuestion)
+                writer.writerow([strDate, numOfQues, numOfAlmostOk, numOfOk])
 
         else:
             print("DevModeなので、シリアライズせずに終了します")
