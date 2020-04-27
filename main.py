@@ -132,10 +132,10 @@ isDevMode = False
 with open('lstQuestion.csv', encoding="shift-jis") as f:
     reader = csv.reader(f)
     lstQuestionTmp = [row for row in reader]
-for lst in lstQuestionTmp:
-    if lst:
-        ques = Question(lst[0], lst[1],lst[2:4], lst[4], int(lst[5]), int(lst[6]), lst[7], lst[8])
-        lstQuestion.append(ques)
+    for lst in lstQuestionTmp:
+        if lst:
+            ques = Question(lst[0], lst[1],lst[2:4], lst[4], int(lst[5]), int(lst[6]), lst[7], lst[8])
+            lstQuestion.append(ques)
 
 while(loop):
     mode = input("1:問題 2:回答統計 3:終了\n")
@@ -197,6 +197,7 @@ while(loop):
     elif(mode == "3"):
         loop = False
         #DevModeの場合はシリアライズせず終了する
+        #TODO:ここらへん汚すぎ
         if not isDevMode:
             print("終了します")
             lstQuestion.sort(key = lambda lst: lst.evalShouldAns()) #最新の順番に整理するためソート
@@ -205,8 +206,27 @@ while(loop):
                 for lst in lstQuestion:
                     writer.writerow(lst.getDataForCSV())
             #とりあえず日付ごとの状況を記録しておく
-            with open('history.csv', 'a', encoding="shift-jis") as f:
+            lstHistory = []
+            with open('history.csv', 'r', encoding='shift-jis') as f:
+                reader = csv.reader(f)
+                lstHistory = [row for row in reader]
+                day = str(datetime.date.today().day)
+                month = str(datetime.date.today().month)
+                year = str(datetime.date.today().year)
+                for lst in lstHistory:
+                    if(lst and lst[0] == year+'-'+month+'-'+day):
+                        lstHistory.remove(lst)
+
+            with open('history.csv', 'w', encoding="shift-jis") as f:
                 writer = csv.writer(f)
+                nCount = 1
+                writer.writerow(['date', 'numQuestion', 'almostOK', 'OK'])
+                for lst in lstHistory:
+                    if(nCount == 1):
+                        nCount += 1
+                        continue
+                    if(lst):
+                        writer.writerow(lst)
                 day = datetime.date.today().day
                 month = datetime.date.today().month
                 year = datetime.date.today().year
