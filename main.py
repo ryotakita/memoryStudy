@@ -8,6 +8,8 @@ import platform
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 class Question():
     def __init__(self, subject, kaisetu , option, ans, numCorrect, numWrong, latestAnsDate, kind):
         self.subject = subject
@@ -66,6 +68,57 @@ def createGraphData(lstOk, lstAlmostOk, lstNg, lstKind):
         lstOk.append(numOfOk)
         lstNg.append(numOfNg)
         lstAlmostOk.append(numOfAlmostOk)
+
+def showHistory():
+    df = pd.read_csv('history.csv',
+                     index_col='date',
+                     parse_dates=True)
+    df = df.set_index([df.index.year, df.index.month, df.index.day, df.index])
+    df.index.names = ["year", "month", "day", "date"]
+
+    # 月毎に集計
+    summary = df.sum(level=('year', 'month', 'day'))        # 年月単位で合計を集計する
+    summary = summary.reset_index()                  # マルチインデックスを解除する
+    summary['year'] = summary['year'].astype(str)    # 「year」列を文字列にする
+    summary['month'] = summary['month'].astype(str)  # 「month」列を文字列にする
+    summary['day'] = summary['day'].astype(str)
+    
+    # 「year」と「month」列を「-」で繋ぎ、タイムスタンプに変換する
+    date = pd.to_datetime(summary['year'].str.cat([summary['month'], summary['day']], sep='-'))
+    
+    # プロット用のデータをSeriesで抽出する
+    numQuestion = summary['numQuestion']
+    almostOK = summary['almostOK']
+    OK = summary['OK']
+    
+    # ここからグラフ描画
+    # フォントの種類とサイズを設定する
+    plt.rcParams['font.size'] = 14
+    plt.rcParams['font.family'] = 'Times New Roman'
+    
+    # 目盛を内側にする
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+    
+    # グラフの上下左右に目盛線を付ける
+    fig = plt.figure(figsize=(10, 3))
+    ax1 = fig.add_subplot(111)
+    ax1.yaxis.set_ticks_position('both')
+    ax1.xaxis.set_ticks_position('both')
+    
+    # 軸のラベルを設定する
+    ax1.set_ylabel('number of question')
+    
+    # データプロット
+    ax1.plot(date, numQuestion, label='numQuestion', lw=2)
+    ax1.plot(date, almostOK, label='almostOK', lw=1)
+    ax1.plot(date, OK, label='OK', lw=1)
+    
+    # グラフを表示する
+    plt.legend()
+    plt.legend(bbox_to_anchor=(0, 1), loc='upper left', borderaxespad=0)
+    plt.show()
+
     
 
 
@@ -137,6 +190,7 @@ while(loop):
         ax.set(xlabel='Subject', ylabel='AllQuestion')
         ax.legend(dataset.index)
         plt.show()
+        showHistory()
         
 
     #終了処理
@@ -156,7 +210,7 @@ while(loop):
                 day = datetime.date.today().day
                 month = datetime.date.today().month
                 year = datetime.date.today().year
-                strDate = str(year) + ":" + str(month) + ":" + str(day)
+                strDate = str(year) + "-" + str(month) + "-" + str(day)
                 numOfOk = len(list(filter(lambda x: x.IsOk(), lstQuestion)))
                 numOfAlmostOk = len(list(filter(lambda x: x.IsAlmostOk(), lstQuestion)))
                 numOfNg = len(list(filter(lambda x: not x.IsAlmostOk() and not x.IsOk(), lstQuestion)))
