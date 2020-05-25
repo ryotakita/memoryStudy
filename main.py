@@ -54,7 +54,6 @@ class Question():
         return (self.getPercentageOfCorrect() * self.getCountOfAns() * 10) / int(self.getDelta(datetime.date.today())) 
 
 def seqQuit():
-    input()
     if(platform.system() == "Windows"):
         os.system("cls")
     else:
@@ -119,6 +118,26 @@ def showHistory():
     plt.legend(bbox_to_anchor=(0, 1), loc='upper left', borderaxespad=0)
     plt.show()
 
+def editQuestion(ques):
+    print("問題を編集します")
+    print("1:問題文, 2:正答肢, 3:解説文")
+    selectEdit = input("編集したい項目を選択してください")
+    correctSentense = input("正しい文又は正答肢を入力してください")
+    fixed = "エラー"
+    if(selectEdit == "1"):
+        ques.subject = correctSentense
+        fixed = "問題文"
+    elif(selectEdit == "2"):
+        ques.ans = correctSentense
+        fixed = "正答肢"
+    elif(selectEdit == "3"):
+        ques.kaisetu = correctSentense
+        fixed = "解説文"
+    if(correctSentense != "0"):
+        print(fixed + "を" + correctSentense + "に変更しました。")
+    else:
+        print("問題編集をキャンセルしました")
+
 loop = True
 lstQuestion = []
 isDevMode = False
@@ -149,7 +168,6 @@ while(loop):
             if(userAns == ques.ans):
                 print("正解")
                 print(ques.kaisetu)
-                seqQuit()
                 ques.numCorrect += 1
                 ques.latestAnsDate = datetime.date.today()
             elif(userAns == "0"):
@@ -162,8 +180,11 @@ while(loop):
                 print("不正解!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 print(ques.kaisetu)
                 input("")
-                seqQuit()
                 ques.numWrong += 1
+            inputOption = input("")
+            if(inputOption == "edt"):
+                editQuestion(ques)
+            seqQuit() 
 
     #問題統計モード
     elif(mode == "2"):
